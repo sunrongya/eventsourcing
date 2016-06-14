@@ -5,5 +5,6 @@
 
 ## 参考
 [botchniaque/eventsourcing-cqrs-go](https://github.com/botchniaque/eventsourcing-cqrs-go) </br>
-[looplab/eventhorizon](https://github.com/looplab/eventhorizon)
+[looplab/eventhorizon](https://github.com/looplab/eventhorizon) </br>
+[thebookofeveryone/cqrs](https://github.com/thebookofeveryone/cqrs)
 
