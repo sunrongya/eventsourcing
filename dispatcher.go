@@ -24,64 +24,58 @@ func NewDispatcher() Dispatcher {
 }
 
 type InternalDispatcher struct {
-	MessageTypes   map[string]reflect.Type
-	handlers       Handlers
-	globalHandlers GlobalHandlers
+	_messageTypes   map[string]reflect.Type
+	_handlers       Handlers
+	_globalHandlers GlobalHandlers
 }
 
-func (d *InternalDispatcher) AddGlobalHandler(handler Handler) {
-	d.globalHandlers = append(d.globalHandlers, handler)
+func (this *InternalDispatcher) AddGlobalHandler(handler Handler) {
+	this._globalHandlers = append(this._globalHandlers, handler)
 }
 
-func (d *InternalDispatcher) addHandler(messageType reflect.Type, handler Handler) {
-	_, ok := d.handlers[messageType]
+func (this *InternalDispatcher) addHandler(messageType reflect.Type, handler Handler) {
+	_, ok := this._handlers[messageType]
 	if !ok {
-		d.handlers[messageType] = make([]Handler, 0)
+		this._handlers[messageType] = make([]Handler, 0)
 	}
-	_, exists := d.MessageTypes[messageType.Name()]
+	_, exists := this._messageTypes[messageType.Name()]
 	if !exists {
-		d.MessageTypes[messageType.Name()] = messageType
+		this._messageTypes[messageType.Name()] = messageType
 	}
-	d.handlers[messageType] = append(d.handlers[messageType], handler)
+	this._handlers[messageType] = append(this._handlers[messageType], handler)
 }
 
-func (d *InternalDispatcher) RegisterHandler(handler Handler) {
+func (this *InternalDispatcher) RegisterHandler(handler Handler) {
 	eventType := reflect.TypeOf(handler).In(1)
-	d.addHandler(eventType, handler)
+	this.addHandler(eventType, handler)
 }
 
-func (d *InternalDispatcher) RegisterHandlers(source interface{}) {
-
+func (this *InternalDispatcher) RegisterHandlers(source interface{}) {
 	productType := reflect.TypeOf(source)
-	numMethods := productType.NumMethod()
-
-	for i := 0; i < numMethods; i++ {
-
+	for i := 0; i < productType.NumMethod(); i++ {
 		method := productType.Method(i)
-
-		if strings.HasPrefix(method.Name, "Handle") {
-			eventType := method.Type.In(1)
-			handler := func(event Event) {
-				eventValue := reflect.ValueOf(event)
-				method.Func.Call([]reflect.Value{
-					reflect.ValueOf(source),
-					eventValue})
-			}
-			d.addHandler(eventType, handler)
+		if !strings.HasPrefix(method.Name, "Handle") {
+			continue
 		}
-
+		eventType := method.Type.In(1)
+		handler := func(event Event) {
+			eventValue := reflect.ValueOf(event)
+			method.Func.Call([]reflect.Value{
+				reflect.ValueOf(source),
+				eventValue})
+		}
+		this.addHandler(eventType, handler)
 	}
-
 }
 
-func (d *InternalDispatcher) Dispatch(message Event) {
+func (this *InternalDispatcher) Dispatch(message Event) {
 	eventType := reflect.TypeOf(message)
-	if val, ok := d.handlers[eventType]; ok {
+	if val, ok := this._handlers[eventType]; ok {
 		for _, handler := range val {
 			handler(message)
 		}
 	}
-	for _, handler := range d.globalHandlers {
+	for _, handler := range this._globalHandlers {
 		handler(message)
 	}
 }

@@ -12,22 +12,22 @@ type mockService struct {
 	command es.Command
 }
 
-func (m *mockService) HandleCommands() {
+func (this *mockService) HandleCommands() {
 }
 
-func (m *mockService) CommandChannel() chan<- es.Command {
+func (this *mockService) CommandChannel() chan<- es.Command {
 	return nil
 }
 
-func (m *mockService) PublishCommand(command es.Command) error {
+func (this *mockService) PublishCommand(command es.Command) error {
 	if err := checkCommand(command); err != nil {
 		return err
 	}
-	m.command = command
+	this.command = command
 	return nil
 }
 
-func (m *mockService) RestoreAggregate(guid es.Guid) es.Aggregate {
+func (this *mockService) RestoreAggregate(guid es.Guid) es.Aggregate {
 	return nil
 }
 
@@ -42,8 +42,8 @@ type CommandFieldError struct {
 	Field string
 }
 
-func (c CommandFieldError) Error() string {
-	return "missing field: " + c.Field
+func (this CommandFieldError) Error() string {
+	return "missing field: " + this.Field
 }
 
 func checkCommand(command es.Command) error {

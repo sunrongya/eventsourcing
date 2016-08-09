@@ -10,33 +10,37 @@ type EventBus interface {
 }
 
 type InternalEventBus struct {
-	store      *MemEventStore
-	dispatcher Dispatcher
+	_store      EventStore
+	_dispatcher Dispatcher
 }
 
-func NewInternalEventBus(store *MemEventStore) EventBus {
+func NewInternalEventBus(store EventStore) EventBus {
 	return &InternalEventBus{
-		store:      store,
-		dispatcher: NewDispatcher(),
+		_store:      store,
+		_dispatcher: NewDispatcher(),
 	}
 }
 
 func (this InternalEventBus) AddGlobalHandler(handler Handler) {
-	this.dispatcher.AddGlobalHandler(handler)
+	this._dispatcher.AddGlobalHandler(handler)
 }
 
 func (this InternalEventBus) RegisterHandler(handler Handler) {
-	this.dispatcher.RegisterHandler(handler)
+	this._dispatcher.RegisterHandler(handler)
 }
 
 func (this InternalEventBus) RegisterHandlers(source interface{}) {
-	this.dispatcher.RegisterHandlers(source)
+	this._dispatcher.RegisterHandlers(source)
 }
 
 func (this InternalEventBus) HandleEvents() {
-	eventChan := this.store.GetEventChan()
+	eventChannel, ok := this._store.(EventChannel)
+	if !ok {
+		return
+	}
+	eventChan := eventChannel.GetEventChan()
 	for {
 		event := <-eventChan
-		this.dispatcher.Dispatch(event)
+		this._dispatcher.Dispatch(event)
 	}
 }

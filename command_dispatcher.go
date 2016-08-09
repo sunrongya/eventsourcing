@@ -10,25 +10,25 @@ type ARProcessCommandFun func(interface{}) ProcessCommandFun
 
 func NewCommandDispatcher() *CommandDispatcher {
 	return &CommandDispatcher{
-		prefix:   "Process",
-		handlers: make(map[reflect.Type]ARProcessCommandFun),
+		_prefix:   "Process",
+		_handlers: make(map[reflect.Type]ARProcessCommandFun),
 	}
 }
 
 type CommandDispatcher struct {
-	prefix   string
-	handlers map[reflect.Type]ARProcessCommandFun
+	_prefix   string
+	_handlers map[reflect.Type]ARProcessCommandFun
 }
 
-func (d *CommandDispatcher) add(commandType reflect.Type, handler ARProcessCommandFun) {
-	d.handlers[commandType] = handler
+func (this *CommandDispatcher) add(commandType reflect.Type, handler ARProcessCommandFun) {
+	this._handlers[commandType] = handler
 }
 
-func (d *CommandDispatcher) Register(source interface{}) {
+func (this *CommandDispatcher) Register(source interface{}) {
 	aggregateType := reflect.TypeOf(source)
 	for i := 0; i < aggregateType.NumMethod(); i++ {
 		method := aggregateType.Method(i)
-		if !strings.HasPrefix(method.Name, d.prefix) {
+		if !strings.HasPrefix(method.Name, this._prefix) {
 			continue
 		}
 		commadType := method.Type.In(1)
@@ -39,16 +39,16 @@ func (d *CommandDispatcher) Register(source interface{}) {
 					reflect.ValueOf(aggerate),
 					commadValue})
 				for _, v := range values {
-				    events = append(events, v.Interface().([]Event)... ) 
+					events = append(events, v.Interface().([]Event)...)
 				}
 				return
 			}
 		}
-		d.add(commadType, handler)
+		this.add(commadType, handler)
 	}
 }
 
-func (d *CommandDispatcher) Get(command Command) (ARProcessCommandFun, bool) {
-	handler, ok := d.handlers[reflect.TypeOf(command)]
+func (this *CommandDispatcher) Get(command Command) (ARProcessCommandFun, bool) {
+	handler, ok := this._handlers[reflect.TypeOf(command)]
 	return handler, ok
 }

@@ -27,27 +27,27 @@ type ReadRepository interface {
 
 // MemoryReadRepository implements an in memory repository of read models.
 type MemoryReadRepository struct {
-	data map[Guid]interface{}
+	_data map[Guid]interface{}
 }
 
 // NewMemoryReadRepository creates a new MemoryReadRepository.
 func NewMemoryReadRepository() *MemoryReadRepository {
 	r := &MemoryReadRepository{
-		data: make(map[Guid]interface{}),
+		_data: make(map[Guid]interface{}),
 	}
 	return r
 }
 
 // Save saves a read model with id to the repository.
-func (r *MemoryReadRepository) Save(id Guid, model interface{}) error {
-	r.data[id] = model
+func (this *MemoryReadRepository) Save(id Guid, model interface{}) error {
+	this._data[id] = model
 	return nil
 }
 
 // Find returns one read model with using an id. Returns
 // ErrModelNotFound if no model could be found.
-func (r *MemoryReadRepository) Find(id Guid) (interface{}, error) {
-	if model, ok := r.data[id]; ok {
+func (this *MemoryReadRepository) Find(id Guid) (interface{}, error) {
+	if model, ok := this._data[id]; ok {
 		return model, nil
 	}
 
@@ -55,9 +55,9 @@ func (r *MemoryReadRepository) Find(id Guid) (interface{}, error) {
 }
 
 // FindAll returns all read models in the repository.
-func (r *MemoryReadRepository) FindAll() ([]interface{}, error) {
+func (this *MemoryReadRepository) FindAll() ([]interface{}, error) {
 	models := []interface{}{}
-	for _, model := range r.data {
+	for _, model := range this._data {
 		models = append(models, model)
 	}
 	return models, nil
@@ -65,9 +65,9 @@ func (r *MemoryReadRepository) FindAll() ([]interface{}, error) {
 
 // Remove removes a read model with id from the repository. Returns
 // ErrModelNotFound if no model could be found.
-func (r *MemoryReadRepository) Remove(id Guid) error {
-	if _, ok := r.data[id]; ok {
-		delete(r.data, id)
+func (this *MemoryReadRepository) Remove(id Guid) error {
+	if _, ok := this._data[id]; ok {
+		delete(this._data, id)
 		return nil
 	}
 

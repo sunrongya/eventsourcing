@@ -13,36 +13,36 @@ type Service interface {
 
 // common properties for all customer facing services
 type service struct {
-	commandChannel   chan Command
-	store            EventStore
-	aggregateFactory func() Aggregate
-	commanDispatcher *CommandDispatcher
+	_commandChannel   chan Command
+	_store            EventStore
+	_aggregateFactory func() Aggregate
+	_commanDispatcher *CommandDispatcher
 }
 
 func NewService(store EventStore, aggregateFactory func() Aggregate) Service {
 	service := &service{
-		commandChannel:   make(chan Command),
-		store:            store,
-		aggregateFactory: aggregateFactory,
-		commanDispatcher: NewCommandDispatcher(),
+		_commandChannel:   make(chan Command),
+		_store:            store,
+		_aggregateFactory: aggregateFactory,
+		_commanDispatcher: NewCommandDispatcher(),
 	}
 	if aggregateFactory != nil {
-		service.commanDispatcher.Register(aggregateFactory())
+		service._commanDispatcher.Register(aggregateFactory())
 		aggerateEventRegister(aggregateFactory())
 	}
 	return service
 }
 
 // Getter for command channel - will allow others to post commands
-func (s *service) CommandChannel() chan<- Command {
-	return s.commandChannel
+func (this *service) CommandChannel() chan<- Command {
+	return this._commandChannel
 }
 
-func (s *service) PublishCommand(command Command) error {
+func (this *service) PublishCommand(command Command) error {
 	if err := checkCommand(command); err != nil {
 		return err
 	}
-	s.commandChannel <- command
+	this._commandChannel <- command
 	return nil
 }
 
@@ -52,27 +52,27 @@ func (s *service) PublishCommand(command Command) error {
 // persists received events.
 // This method *blocks* until command is available,
 // therefore should run in a goroutine
-func (s *service) HandleCommands() {
+func (this *service) HandleCommands() {
 	for {
-		c := <-s.commandChannel
-		aggregate := s.RestoreAggregate(c.GetGuid())
-		if processCommandFun, ok := s.commanDispatcher.Get(c); ok {
+		c := <-this._commandChannel
+		aggregate := this.RestoreAggregate(c.GetGuid())
+		if processCommandFun, ok := this._commanDispatcher.Get(c); ok {
 			events := processCommandFun(aggregate)(c)
 			for _, event := range events {
 				event.SetGuid(c.GetGuid())
 			}
-			s.store.Update(c.GetGuid(), aggregate.Version(), events)
+			this._store.Update(c.GetGuid(), aggregate.Version(), events)
 		} else {
 			panic(fmt.Errorf("Unknown command %#v", c))
 		}
 	}
 }
 
-func (s *service) RestoreAggregate(guid Guid) Aggregate {
-	if s.aggregateFactory == nil {
+func (this *service) RestoreAggregate(guid Guid) Aggregate {
+	if this._aggregateFactory == nil {
 		return nil
 	}
-	aggregate := s.aggregateFactory()
-	RestoreAggregate(guid, aggregate, s.store)
+	aggregate := this._aggregateFactory()
+	RestoreAggregate(guid, aggregate, this._store)
 	return aggregate
 }

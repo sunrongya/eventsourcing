@@ -13,11 +13,11 @@ type WithGuid struct {
 	Guid Guid
 }
 
-func (e *WithGuid) SetGuid(g Guid) {
-	e.Guid = g
+func (this *WithGuid) SetGuid(g Guid) {
+	this.Guid = g
 }
-func (e *WithGuid) GetGuid() Guid {
-	return e.Guid
+func (this *WithGuid) GetGuid() Guid {
+	return this.Guid
 }
 
 type Guid string

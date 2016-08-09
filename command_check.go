@@ -10,8 +10,8 @@ type CommandFieldError struct {
 	Field string
 }
 
-func (c CommandFieldError) Error() string {
-	return "missing field: " + c.Field
+func (this CommandFieldError) Error() string {
+	return "missing field: " + this.Field
 }
 
 func checkCommand(command Command) error {

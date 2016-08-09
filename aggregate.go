@@ -22,15 +22,15 @@ type Aggregate interface {
 // base implementation for all aggregates - with GUID and Version
 type BaseAggregate struct {
 	WithGuid
-	version int
+	_version int
 }
 
-func (b *BaseAggregate) Version() int {
-	return b.version
+func (this *BaseAggregate) Version() int {
+	return this._version
 }
 
-func (b *BaseAggregate) SetVersion(version int) {
-	b.version = version
+func (this *BaseAggregate) SetVersion(version int) {
+	this._version = version
 }
 
 // restores given empty aggregate from a state stored in event store
